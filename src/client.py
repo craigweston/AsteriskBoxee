@@ -6,11 +6,22 @@ import sys
 from boxee.rpc import BoxeeRPC
 
 def pair(boxee, args):
-    boxee.pair(args.passcode) 
-    boxee.pair(sys.stdin.readline().strip())
+    boxee.pair() 
 
-def connect(boxee, args):   
+    print 'Please enter the passcode shown on your TV: ' 
+    success = boxee.pair(sys.stdin.readline().strip())
+    if success:
+        print 'You have successfully paired your device'
+    else:
+        print 'There was an error pairing your device'
+
+def unpair(boxee, args):   
     boxee.connect()
+    success =boxee.unpair()
+    if success:
+        print 'You have unpaired your device successfully'
+    else:
+        print 'There was an error unpairing your device'
 
 def notify(boxee, args):
     boxee.connect()
@@ -26,11 +37,10 @@ def main():
     subparsers = parser.add_subparsers(help='sub commands help')
              
     pairparser = subparsers.add_parser('pair', help='pair command help')
-    pairparser.add_argument('--passcode', help='passcode to response to pair request')
     pairparser.set_defaults(execute=pair)
 
-    connectparser = subparsers.add_parser('connect', help='connect command help')
-    connectparser.set_defaults(execute=connect)
+    unpairparser = subparsers.add_parser('unpair', help='connect command help')
+    unpairparser.set_defaults(execute=unpair)
 
     notifyparser = subparsers.add_parser('notify', help='notify command help')
     notifyparser.add_argument('--msg', help='the notification message to display', nargs='*') 

@@ -24,6 +24,7 @@ class BoxeeRPC:
     
     def __init__(self, host, port, appId = 'Boxee RPC Client'):
         self.socket = None
+        self.appId = appId
         self.host = host
         self.port = port
         self.id = 100
@@ -129,7 +130,7 @@ class BoxeeRPC:
                 return True 
 
         except Exception, e:
-            logger.exception('error sending pair response: %s' % e) 
+            logger.exception('error sending pair response: %s' % str(e)) 
             raise BoxeeRPCException('pairing response failure') 
 
         return False;
@@ -170,7 +171,7 @@ class BoxeeRPC:
                 logger.info('unpaired successfully')
                 return True
         except Exception, e:
-            logger.exception('error sending unpair request')
+            logger.exception('error sending unpair request: %s' % str(e)) 
             raise BoxeeRPCException('unpair failure') 
             
         return False
