@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 
+import sys
 import socket
 import json
 import logging
-import sys
+from logging.handlers import SysLogHandler
 
-from uuid import getnode as get_mac
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG) 
-log_handler = logging.StreamHandler(sys.stdout)
-log_handler.setLevel(logging.DEBUG)
-logger.addHandler(log_handler) 
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+syslog = SysLogHandler(address='/dev/log')
+formatter = logging.Formatter('%(name)s: %(levelname)s %(message)s')
+syslog.setFormatter(formatter)
+logger.addHandler(syslog)
 
 class BoxeeRPCException(Exception):
     def  __init__(self, message):
@@ -20,13 +20,10 @@ class BoxeeRPCException(Exception):
     def __str__(self):
         return repr(self.message)
         
-
-class RPC:
+class BoxeeRPC:
     
     def __init__(self, host, port, appId = 'Boxee RPC Client'):
-        self.socket = None  
-        self.deviceId = str(get_mac())
-        self.appId = appId
+        self.socket = None
         self.host = host
         self.port = port
         self.id = 100
@@ -63,12 +60,9 @@ class RPC:
         return json.dumps(data)
 
     def call(self, data): 
-        self.open()
-        try:
-            self.socket.send(data) 
-            return self.parseResponse()
-        finally:
-            self.close()
+        logger.debug(data);
+        self.socket.send(data) 
+        return self.parseResponse()
 
     def parseResponse(self):
         data = '' 
@@ -97,7 +91,7 @@ class RPC:
         logger.info('sending pairing request')
       
         params = {
-            'deviceid': self.deviceId,
+            'deviceid': socket.gethostname(),
             'applicationid': self.appId,
             'label': 'Boxee Box Python Client',
             'icon': '',
@@ -113,7 +107,7 @@ class RPC:
                 logger.info('pairing request successful')
                 return True  
         except Exception, e:
-            logger.exception('error sending pairing request')
+            logger.exception('error sending pairing request: %s' % e)
             raise BoxeeRPCException('pairing failure') 
         
         return False
@@ -122,7 +116,7 @@ class RPC:
         logger.info('sending pair response')
         
         params = {
-            'deviceid': self.deviceId,
+            'deviceid': socket.gethostname(),
             'code': passcode
         }
         
@@ -135,14 +129,14 @@ class RPC:
                 return True 
 
         except Exception, e:
-            logger.exception('error sending pair response')
+            logger.exception('error sending pair response: %s' % e) 
             raise BoxeeRPCException('pairing response failure') 
 
         return False;
 
     def connect(self):
         params = { 
-            'deviceid': self.deviceId 
+            'deviceid': socket.gethostname()
         }
        
         data = self.createCall('Device.Connect', params)        
@@ -163,7 +157,7 @@ class RPC:
     def unpair(self):
         
         params = {
-            'deviceid': self.deviceId
+            'deviceid': socket.gethostname()
         }
 
         data = self.createCall('Device.Unpair', params)

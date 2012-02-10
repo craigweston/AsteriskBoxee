@@ -2,20 +2,12 @@
 
 import argparse
 import sys
-import logging
 
-from rpc import RPC
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
-log_handler = logging.StreamHandler(sys.stdout)
-log_handler.setLevel(logging.DEBUG)
-logger.addHandler(log_handler)
-
+from boxee.rpc import BoxeeRPC
 
 def pair(boxee, args):
     boxee.pair(args.passcode) 
+    boxee.pair(sys.stdin.readline().strip())
 
 def connect(boxee, args):   
     boxee.connect()
@@ -46,11 +38,13 @@ def main():
 
     args = parser.parse_args()
 
-    boxee = RPC(args.host, args.port or 9090)
+    boxee = BoxeeRPC(args.host, args.port or 9090)
+    boxee.open()
+
     try:
         args.execute(boxee, args)
-    except Exception:
-        logger.exception('Boxee RPC error')
+    except Exception, err:
+        sys.stderr.write('ERROR: %s\n' % str(err))
         return 1 
     finally:
         boxee.close()
