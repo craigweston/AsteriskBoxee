@@ -1,6 +1,7 @@
 ================
 AsteriskBoxee
 ================
+Tested with Python 2.6.6
 
 AsteriskBoxee is a tool written in Python to provide Caller ID functionality on
 the Boxee Box from calls received on an Asterisk PBX.
@@ -20,7 +21,7 @@ packages.
 ================
 USE
 ================
-Please feel free to download use and  modify this tool.
+Please feel free to download use and modify this tool.
 
 ================
 STEPS TO INSTALL
